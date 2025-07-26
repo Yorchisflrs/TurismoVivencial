@@ -1,8 +1,40 @@
-# HogarTours .htaccess
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /hogartours/
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php [L,QSA]
+# HogarTours .htaccess para Producción
+RewriteEngine On
+
+# Para hosting con carpeta raíz (cambiar según hosting)
+# RewriteBase /
+
+# Redirigir todo a index.php excepto archivos y directorios existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Seguridad: Ocultar archivos sensibles
+<Files ~ "^\.">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Bloquear acceso directo a archivos PHP sensibles
+<Files ~ "(config|database|test_|debug_|check_|make_|verify_).*\.php$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Configuración de PHP para producción
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+
+# Habilitar compresión
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
