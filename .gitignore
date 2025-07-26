@@ -1,0 +1,36 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database backups
+*.sql
+
+# Temporary files
+*.tmp
+*.temp
+
+# PHP
+composer.phar
+/vendor/
+
+# Environment files
+.env
+.env.local
+
+# Upload directories with files (keep structure)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Cache
+cache/
+temp/
+
+# Config files with sensitive data (if any)
+config/database.php

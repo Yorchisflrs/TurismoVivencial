@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload Directo</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-container { max-width: 600px; margin: 0 auto; }
+        .response { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>Test Upload Directo</h2>
+        
+        <form id="testForm" enctype="multipart/form-data">
+            <input type="hidden" name="package_id" value="1">
+            
+            <div style="margin-bottom: 15px;">
+                <label>Seleccionar imágenes:</label><br>
+                <input type="file" name="images[]" multiple accept="image/*" required>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <button type="submit" id="submitBtn">Subir Imágenes</button>
+            </div>
+        </form>
+        
+        <div id="response"></div>
+    </div>
+    
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const responseDiv = document.getElementById('response');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Subiendo...';
+            responseDiv.innerHTML = '';
+            
+            fetch('/hogartours/upload_images_direct.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Status:', response.status);
+                console.log('Headers:', [...response.headers.entries()]);
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (data.success) {
+                        responseDiv.innerHTML = `
+                            <div class="response success">
+                                <h3>✅ Éxito</h3>
+                                <p>${data.images.length} imagen(es) subida(s)</p>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        `;
+                        
+                        // Recargar después de 2 segundos
+                        setTimeout(() => {
+                            if (confirm('¿Ir a la página de gestión de imágenes?')) {
+                                window.location.href = '/hogartours/package/images?package_id=1';
+                            }
+                        }, 2000);
+                        
+                    } else {
+                        responseDiv.innerHTML = `
+                            <div class="response error">
+                                <h3>❌ Error</h3>
+                                <p>${data.error}</p>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    responseDiv.innerHTML = `
+                        <div class="response error">
+                            <h3>❌ Error de JSON</h3>
+                            <p>La respuesta no es JSON válido: ${e.message}</p>
+                            <pre>${text}</pre>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                responseDiv.innerHTML = `
+                    <div class="response error">
+                        <h3>❌ Error de Red</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Subir Imágenes';
+            });
+        });
+    </script>
+</body>
+</html>

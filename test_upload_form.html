@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload de Imágenes</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h2>Test Upload de Imágenes</h2>
+    
+    <form id="testForm" enctype="multipart/form-data">
+        <input type="hidden" name="package_id" value="1">
+        <input type="file" name="images[]" multiple accept="image/*" id="fileInput">
+        <button type="submit">Subir</button>
+    </form>
+    
+    <div id="response"></div>
+    
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.innerHTML = 'Subiendo...';
+            
+            fetch('/hogartours/api/images/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                // Obtener el texto crudo primero
+                return response.text();
+            })
+            .then(text => {
+                console.log('Response text:', text);
+                responseDiv.innerHTML = '<h3>Raw Response:</h3><pre>' + text + '</pre>';
+                
+                // Intentar parsear como JSON
+                try {
+                    const data = JSON.parse(text);
+                    responseDiv.innerHTML += '<h3>Parsed JSON:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } catch (e) {
+                    responseDiv.innerHTML += '<h3>JSON Parse Error:</h3><pre>' + e.message + '</pre>';
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                responseDiv.innerHTML = '<h3>Error:</h3><pre>' + error.message + '</pre>';
+            });
+        });
+    </script>
+</body>
+</html>
